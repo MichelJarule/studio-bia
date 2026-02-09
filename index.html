@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>B&S — Studio Bia</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+font-family:'Montserrat',sans-serif;
+background:#0f0f0f;
+color:#fff;
+overflow-x:hidden;
+}
+
+/* HEADER */
+header{
+position:relative;
+padding:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+border-bottom:1px solid #222;
+}
+
+.logo{
+font-family:'Playfair Display',serif;
+font-size:28px;
+letter-spacing:2px;
+}
+
+.logo span{color:#C6A75E;}
+
+.hamburger{
+position:absolute;
+left:20px;
+font-size:28px;
+cursor:pointer;
+color:#C6A75E;
+}
+
+/* SIDEBAR */
+.sidebar{
+position:fixed;
+left:-320px;
+top:0;
+width:300px;
+height:100%;
+background:#141414;
+border-right:2px solid #C6A75E;
+transition:0.4s;
+padding:20px;
+overflow-y:auto;
+z-index:1000;
+}
+
+.sidebar.active{ left:0; }
+
+.menu-item{
+margin:15px 0;
+cursor:pointer;
+font-weight:600;
+color:#C6A75E;
+}
+
+.submenu{
+display:none;
+margin-left:10px;
+font-size:14px;
+color:#aaa;
+}
+
+.submenu div{
+margin:8px 0;
+cursor:pointer;
+}
+
+.section{
+max-width:1000px;
+margin:auto;
+padding:40px 20px;
+}
+
+.services{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+}
+
+.service{
+background:#1b1b1b;
+padding:20px;
+border:1px solid #333;
+cursor:pointer;
+transition:0.3s;
+}
+
+.service:hover{ border-color:#C6A75E; }
+
+.selected{
+background:#C6A75E;
+color:#000;
+}
+
+.calendar-grid{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:8px;
+margin-top:15px;
+}
+
+.calendar-day{
+padding:10px;
+text-align:center;
+background:#1b1b1b;
+cursor:pointer;
+}
+
+.selected-day{
+background:#C6A75E;
+color:#000;
+}
+
+.times{
+margin-top:20px;
+}
+
+.time{
+display:inline-block;
+padding:8px;
+margin:5px;
+background:#1b1b1b;
+cursor:pointer;
+}
+
+.selected-time{
+background:#C6A75E;
+color:#000;
+}
+
+button{
+padding:12px 25px;
+background:#C6A75E;
+border:none;
+font-weight:bold;
+cursor:pointer;
+margin-top:20px;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+
+.floating{
+position:fixed;
+top:120px;
+right:50px;
+background:#1b1b1b;
+border:2px solid #C6A75E;
+padding:20px;
+width:300px;
+display:none;
+}
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #333;
+padding:8px;
+}
+
+footer{
+margin-top:60px;
+padding:20px;
+text-align:center;
+background:#0a0a0a;
+border-top:1px solid #222;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="hamburger" onclick="toggleSidebar()">☰</div>
+<div class="logo">B&S <span>Studio Bia</span></div>
+</header>
+
+<div class="sidebar" id="sidebar">
+<div class="menu-item" onclick="toggleSub('clientes')">Clientes</div>
+<div class="submenu" id="clientes">
+<div onclick="mostrarLista()">Lista de Agendamentos</div>
+</div>
+</div>
+
+<div class="section">
+
+<h2>Novo Agendamento</h2>
+
+<div class="services" id="services"></div>
+
+<input type="text" id="nome" placeholder="Nome">
+<input type="text" id="telefone" placeholder="Telefone">
+
+<h3>Escolha a Data</h3>
+<div class="calendar-grid" id="calendar"></div>
+
+<h3>Horário</h3>
+<div class="times" id="times"></div>
+
+<button onclick="mostrarResumo()">Confirmar</button>
+
+<div id="listaAgendamentos" style="display:none;">
+<h2>Lista de Agendamentos</h2>
+<table>
+<thead>
+<tr>
+<th>Cliente</th>
+<th>Data</th>
+<th>Hora</th>
+<th>Serviços</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="tabelaAgendamentos"></tbody>
+</table>
+</div>
+
+</div>
+
+<div class="floating" id="floating">
+<h3>Confirmar Agendamento</h3>
+<p id="resumo"></p>
+<textarea id="obs" placeholder="Observação"></textarea>
+<button onclick="confirmar()">Finalizar</button>
+</div>
+
+<footer>
+© 2026 — B&S Studio Bia
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAMc5Jd9zwpVi0nrwF2xh-gh6N3jhyRQ7s",
+  authDomain: "studio-b9540.firebaseapp.com",
+  projectId: "studio-b9540",
+  storageBucket: "studio-b9540.firebasestorage.app",
+  messagingSenderId: "462575427037",
+  appId: "1:462575427037:web:47340177f8da781badea34",
+  measurementId: "G-SGC5XHVE23"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const servicos=[
+{nome:"Alongamento 2h",valor:150},
+{nome:"Esmaltação gel mão",valor:80},
+{nome:"Esmaltação mão",valor:30},
+{nome:"Esmaltação pé",valor:30},
+{nome:"Manutenção Alongamento",valor:120},
+{nome:"Unha em gel pé",valor:80}
+];
+
+let selecionados=[];
+let dataSel="";
+let horaSel="";
+
+servicos.forEach((s,i)=>{
+let div=document.createElement("div");
+div.className="service";
+div.innerHTML=`${s.nome}<br>R$ ${s.valor},00`;
+div.onclick=()=>{
+div.classList.toggle("selected");
+if(selecionados.includes(i)){
+selecionados=selecionados.filter(x=>x!==i);
+}else{
+selecionados.push(i);
+}
+};
+document.getElementById("services").appendChild(div);
+});
+
+window.toggleSidebar=function(){
+document.getElementById("sidebar").classList.toggle("active");
+}
+
+window.toggleSub=function(id){
+let el=document.getElementById(id);
+el.style.display = el.style.display==="block" ? "none" : "block";
+}
+
+window.mostrarLista=function(){
+document.getElementById("listaAgendamentos").style.display="block";
+}
+
+function gerarCalendario(){
+let cal=document.getElementById("calendar");
+let hoje=new Date();
+for(let i=0;i<7;i++){
+let d=new Date();
+d.setDate(hoje.getDate()+i);
+let div=document.createElement("div");
+div.className="calendar-day";
+div.innerText=d.toLocaleDateString();
+div.onclick=()=>{
+document.querySelectorAll(".calendar-day").forEach(x=>x.classList.remove("selected-day"));
+div.classList.add("selected-day");
+dataSel=d.toLocaleDateString();
+gerarHorarios(d);
+};
+cal.appendChild(div);
+}
+}
+
+function gerarHorarios(d){
+let t=document.getElementById("times");
+t.innerHTML="";
+let dia=d.getDay();
+let inicio=8;
+let fim=(dia===6)?16:20;
+
+for(let h=inicio;h<=fim;h++){
+let hora=(h<10?"0"+h:h)+":00";
+let div=document.createElement("div");
+div.className="time";
+div.innerText=hora;
+div.onclick=()=>{
+document.querySelectorAll(".time").forEach(x=>x.classList.remove("selected-time"));
+div.classList.add("selected-time");
+horaSel=hora;
+};
+t.appendChild(div);
+}
+}
+
+window.mostrarResumo=function(){
+let total=0;
+let nomes=[];
+selecionados.forEach(i=>{
+total+=servicos[i].valor;
+nomes.push(servicos[i].nome);
+});
+
+document.getElementById("resumo").innerHTML=
+`Cliente: ${document.getElementById("nome").value}<br>
+Data: ${dataSel}<br>
+Hora: ${horaSel}<br>
+Serviços: ${nomes.join(", ")}<br>
+<strong>Total: R$ ${total},00</strong>`;
+
+document.getElementById("floating").style.display="block";
+}
+
+window.confirmar=async function(){
+
+let nome=document.getElementById("nome").value;
+let telefone=document.getElementById("telefone").value;
+
+let total=0;
+let nomes=[];
+
+selecionados.forEach(i=>{
+total+=servicos[i].valor;
+nomes.push(servicos[i].nome);
+});
+
+if(!nome || !dataSel || !horaSel || selecionados.length===0){
+alert("Preencha todas as informações.");
+return;
+}
+
+await addDoc(collection(db,"agendamentos"),{
+nome,
+telefone,
+data:dataSel,
+hora:horaSel,
+servicos:nomes,
+total:total,
+criadoEm:new Date()
+});
+
+alert("Agendamento Confirmado 💎");
+
+document.getElementById("floating").style.display="none";
+resetar();
+carregarAgendamentos();
+}
+
+function resetar(){
+document.getElementById("nome").value="";
+document.getElementByById("telefone").value="";
+selecionados=[];
+dataSel="";
+horaSel="";
+document.querySelectorAll(".selected,.selected-day,.selected-time")
+.forEach(x=>x.classList.remove("selected","selected-day","selected-time"));
+}
+
+async function carregarAgendamentos(){
+let tabela=document.getElementById("tabelaAgendamentos");
+tabela.innerHTML="";
+const querySnapshot = await getDocs(collection(db,"agendamentos"));
+querySnapshot.forEach((doc)=>{
+let dados=doc.data();
+let row=tabela.insertRow();
+row.insertCell(0).innerText=dados.nome;
+row.insertCell(1).innerText=dados.data;
+row.insertCell(2).innerText=dados.hora;
+row.insertCell(3).innerText=dados.servicos.join(", ");
+row.insertCell(4).innerText="R$ "+dados.total+",00";
+});
+}
+
+gerarCalendario();
+carregarAgendamentos();
+
+</script>
+
+</body>
+</html>
