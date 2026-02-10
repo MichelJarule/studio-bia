@@ -1,431 +1,342 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>B&S — Studio Bia</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B&S Studio Bia - Agendamento Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C6A75E;
+            --dark-bg: #0f0f0f;
+            --card-bg: #1b1b1b;
+            --border: #333;
+            --white: #ffffff;
+        }
 
-<style>
-body{
-margin:0;
-font-family:'Montserrat',sans-serif;
-background:#0f0f0f;
-color:#fff;
-overflow-x:hidden;
-}
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--dark-bg);
+            color: var(--white);
+        }
 
-/* HEADER */
-header{
-position:relative;
-padding:20px;
-display:flex;
-justify-content:center;
-align-items:center;
-border-bottom:1px solid #222;
-}
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            letter-spacing: 3px;
+            border-bottom: 1px solid #222;
+        }
+        header span { color: var(--gold); }
 
-.logo{
-font-family:'Playfair Display',serif;
-font-size:28px;
-letter-spacing:2px;
-}
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
 
-.logo span{color:#C6A75E;}
+        h2, h3 { color: var(--gold); font-weight: 400; text-align: center; }
 
-.hamburger{
-position:absolute;
-left:20px;
-font-size:28px;
-cursor:pointer;
-color:#C6A75E;
-}
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #151515;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus { border-color: var(--gold); outline: none; }
 
-/* SIDEBAR */
-.sidebar{
-position:fixed;
-left:-320px;
-top:0;
-width:300px;
-height:100%;
-background:#141414;
-border-right:2px solid #C6A75E;
-transition:0.4s;
-padding:20px;
-overflow-y:auto;
-z-index:1000;
-}
+        textarea { height: 80px; resize: none; }
 
-.sidebar.active{ left:0; }
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-.menu-item{
-margin:15px 0;
-cursor:pointer;
-font-weight:600;
-color:#C6A75E;
-}
+        .service {
+            background: var(--card-bg);
+            padding: 20px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            text-align: center;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
 
-.submenu{
-display:none;
-margin-left:10px;
-font-size:14px;
-color:#aaa;
-}
+        .service.selected {
+            background: var(--gold);
+            color: #000;
+            font-weight: bold;
+            border-color: var(--gold);
+        }
 
-.submenu div{
-margin:8px 0;
-cursor:pointer;
-}
+        .btn-abrir {
+            display: none;
+            width: 100%;
+            padding: 20px;
+            background: var(--gold);
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
 
-.section{
-max-width:1000px;
-margin:auto;
-padding:40px 20px;
-}
+        /* MODAIS */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-.services{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:15px;
-}
+        .modal-content {
+            background: #111;
+            width: 95%;
+            max-width: 500px;
+            border-radius: 15px;
+            position: relative;
+            border: 1px solid var(--gold);
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(198, 167, 94, 0.2);
+        }
 
-.service{
-background:#1b1b1b;
-padding:20px;
-border:1px solid #333;
-cursor:pointer;
-transition:0.3s;
-}
+        .calendar-header {
+            text-align: center;
+            background: var(--gold);
+            color: #000;
+            padding: 20px;
+        }
 
-.service:hover{ border-color:#C6A75E; }
+        .calendar-body { padding: 20px; }
 
-.selected{
-background:#C6A75E;
-color:#000;
-}
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
 
-.calendar-grid{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:8px;
-margin-top:15px;
-}
+        .weekday-label { font-weight: bold; color: var(--gold); font-size: 12px; margin-bottom: 10px; }
 
-.calendar-day{
-padding:10px;
-text-align:center;
-background:#1b1b1b;
-cursor:pointer;
-}
+        .day {
+            padding: 12px 5px;
+            cursor: pointer;
+            border-radius: 8px;
+            background: #1a1a1a;
+            border: 1px solid #222;
+        }
+        .day.selected { background: var(--gold) !important; color: #000; font-weight: bold; }
+        .day.disabled { color: #444; cursor: not-allowed; background: transparent; border: none; }
 
-.selected-day{
-background:#C6A75E;
-color:#000;
-}
+        /* HORÁRIOS E OBSERVAÇÃO */
+        .detalhes-container { display: none; padding: 0 20px 25px 20px; }
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .time-item {
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .time-item.selected { background: var(--gold); color: #000; font-weight: bold; }
 
-.times{
-margin-top:20px;
-}
+        .btn-confirmar {
+            width: 100%;
+            padding: 18px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
 
-.time{
-display:inline-block;
-padding:8px;
-margin:5px;
-background:#1b1b1b;
-cursor:pointer;
-}
-
-.selected-time{
-background:#C6A75E;
-color:#000;
-}
-
-button{
-padding:12px 25px;
-background:#C6A75E;
-border:none;
-font-weight:bold;
-cursor:pointer;
-margin-top:20px;
-}
-
-input,textarea{
-width:100%;
-padding:10px;
-margin:10px 0;
-}
-
-.floating{
-position:fixed;
-top:120px;
-right:50px;
-background:#1b1b1b;
-border:2px solid #C6A75E;
-padding:20px;
-width:300px;
-display:none;
-}
-
-table{
-width:100%;
-margin-top:20px;
-border-collapse:collapse;
-}
-
-th,td{
-border:1px solid #333;
-padding:8px;
-}
-
-footer{
-margin-top:60px;
-padding:20px;
-text-align:center;
-background:#0a0a0a;
-border-top:1px solid #222;
-}
-</style>
+        /* POP-UP DE SUCESSO */
+        #modalSucesso .modal-content {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-icon { font-size: 50px; color: var(--gold); margin-bottom: 15px; }
+        .recibo {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px dashed var(--gold);
+        }
+        .recibo p { margin: 5px 0; font-size: 14px; }
+    </style>
 </head>
-
 <body>
 
-<header>
-<div class="hamburger" onclick="toggleSidebar()">☰</div>
-<div class="logo">B&S <span>Studio Bia</span></div>
-</header>
+<header>B&S <span>Studio Bia</span></header>
 
-<div class="sidebar" id="sidebar">
-<div class="menu-item" onclick="toggleSub('clientes')">Clientes</div>
-<div class="submenu" id="clientes">
-<div onclick="mostrarLista()">Lista de Agendamentos</div>
-</div>
-</div>
+<div class="container">
+    <input type="text" id="nome" placeholder="Seu Nome Completo">
+    <input type="tel" id="telefone" placeholder="Seu WhatsApp">
 
-<div class="section">
+    <h3>Selecione os serviços</h3>
+    <div class="services" id="services"></div>
 
-<h2>Novo Agendamento</h2>
-
-<div class="services" id="services"></div>
-
-<input type="text" id="nome" placeholder="Nome">
-<input type="text" id="telefone" placeholder="Telefone">
-
-<h3>Escolha a Data</h3>
-<div class="calendar-grid" id="calendar"></div>
-
-<h3>Horário</h3>
-<div class="times" id="times"></div>
-
-<button onclick="mostrarResumo()">Confirmar</button>
-
-<div id="listaAgendamentos" style="display:none;">
-<h2>Lista de Agendamentos</h2>
-<table>
-<thead>
-<tr>
-<th>Cliente</th>
-<th>Data</th>
-<th>Hora</th>
-<th>Serviços</th>
-<th>Total</th>
-</tr>
-</thead>
-<tbody id="tabelaAgendamentos"></tbody>
-</table>
+    <button class="btn-abrir" id="btnAbrir" onclick="abrirModalAgenda()">Escolher Data e Horário 📅</button>
 </div>
 
+<div class="modal-overlay" id="modalAgenda">
+    <div class="modal-content">
+        <div class="calendar-header">
+            <h4 style="margin:0">Fevereiro 2026</h4>
+        </div>
+        <div class="calendar-body">
+            <div class="calendar-grid">
+                <div class="weekday-label">Seg</div><div class="weekday-label">Ter</div><div class="weekday-label">Qua</div>
+                <div class="weekday-label">Qui</div><div class="weekday-label">Sex</div><div class="weekday-label">Sáb</div>
+                <div class="weekday-label">Dom</div>
+                <div id="days-container" style="display: contents;"></div>
+            </div>
+        </div>
+
+        <div class="detalhes-container" id="detalhesContainer">
+            <h4 style="color:var(--gold); margin-bottom:10px;">Horários:</h4>
+            <div class="time-grid" id="timeGrid"></div>
+            
+            <h4 style="color:var(--gold); margin-bottom:10px;">Observações (Opcional):</h4>
+            <textarea id="observacao" placeholder="Ex: Preciso remover alongamento antigo, ou desejo decoração específica..."></textarea>
+            
+            <button class="btn-confirmar" id="btnFinal" onclick="registrarAgendamento()">Finalizar Agendamento</button>
+        </div>
+    </div>
 </div>
 
-<div class="floating" id="floating">
-<h3>Confirmar Agendamento</h3>
-<p id="resumo"></p>
-<textarea id="obs" placeholder="Observação"></textarea>
-<button onclick="confirmar()">Finalizar</button>
+<div class="modal-overlay" id="modalSucesso">
+    <div class="modal-content">
+        <div class="success-icon">💎</div>
+        <h2 style="margin:0">Agendamento Realizado!</h2>
+        <p>Sua solicitação foi enviada para o WhatsApp da Bia.</p>
+        
+        <div class="recibo" id="reciboContent"></div>
+
+        <button class="btn-confirmar" onclick="fecharTudo()">Fechar e Início</button>
+    </div>
 </div>
 
-<footer>
-© 2026 — B&S Studio Bia
-</footer>
+<script>
+    const servicos = [
+        {nome:"Alongamento 2h", valor:150},
+        {nome:"Esmaltação gel mão", valor:80},
+        {nome:"Esmaltação mão", valor:30},
+        {nome:"Esmaltação pé", valor:30},
+        {nome:"Manutenção Alongamento", valor:120},
+        {nome:"Unha em gel pé", valor:80}
+    ];
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    let selecionados = [];
+    let dataSel = "";
+    let horaSel = "";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAMc5Jd9zwpVi0nrwF2xh-gh6N3jhyRQ7s",
-  authDomain: "studio-b9540.firebaseapp.com",
-  projectId: "studio-b9540",
-  storageBucket: "studio-b9540.firebasestorage.app",
-  messagingSenderId: "462575427037",
-  appId: "1:462575427037:web:47340177f8da781badea34",
-  measurementId: "G-SGC5XHVE23"
-};
+    // Popular Serviços
+    const sDiv = document.getElementById("services");
+    servicos.forEach((s, i) => {
+        let div = document.createElement("div");
+        div.className = "service";
+        div.innerHTML = `<strong>${s.nome}</strong><br>R$ ${s.valor},00`;
+        div.onclick = () => {
+            div.classList.toggle("selected");
+            if(selecionados.includes(i)) selecionados = selecionados.filter(x => x !== i);
+            else selecionados.push(i);
+            document.getElementById("btnAbrir").style.display = selecionados.length > 0 ? "block" : "none";
+        };
+        sDiv.appendChild(div);
+    });
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    function abrirModalAgenda() {
+        document.getElementById("modalAgenda").style.display = "flex";
+        renderCalendar();
+    }
 
-const servicos=[
-{nome:"Alongamento 2h",valor:150},
-{nome:"Esmaltação gel mão",valor:80},
-{nome:"Esmaltação mão",valor:30},
-{nome:"Esmaltação pé",valor:30},
-{nome:"Manutenção Alongamento",valor:120},
-{nome:"Unha em gel pé",valor:80}
-];
+    function renderCalendar() {
+        const container = document.getElementById("days-container");
+        container.innerHTML = "";
+        // Espaços para alinhar o dia 1 ao domingo em Fev/2026
+        for(let s=0; s<6; s++) container.innerHTML += `<div class="day disabled"></div>`;
+        for(let i=1; i<=28; i++) {
+            let d = document.createElement("div");
+            d.className = i < 10 ? "day disabled" : "day";
+            d.innerText = i;
+            if(i >= 10) {
+                d.onclick = () => {
+                    document.querySelectorAll(".day").forEach(el => el.classList.remove("selected"));
+                    d.classList.add("selected");
+                    dataSel = `${i}/02/2026`;
+                    mostrarHorarios();
+                };
+            }
+            container.appendChild(d);
+        }
+    }
 
-let selecionados=[];
-let dataSel="";
-let horaSel="";
+    function mostrarHorarios() {
+        document.getElementById("detalhesContainer").style.display = "block";
+        const grid = document.getElementById("timeGrid");
+        grid.innerHTML = "";
+        ["09:00", "11:00", "14:00", "16:00", "18:00"].forEach(h => {
+            let div = document.createElement("div");
+            div.className = "time-item";
+            div.innerText = h;
+            div.onclick = () => {
+                document.querySelectorAll(".time-item").forEach(el => el.classList.remove("selected"));
+                div.classList.add("selected");
+                horaSel = h;
+            };
+            grid.appendChild(div);
+        });
+    }
 
-servicos.forEach((s,i)=>{
-let div=document.createElement("div");
-div.className="service";
-div.innerHTML=`${s.nome}<br>R$ ${s.valor},00`;
-div.onclick=()=>{
-div.classList.toggle("selected");
-if(selecionados.includes(i)){
-selecionados=selecionados.filter(x=>x!==i);
-}else{
-selecionados.push(i);
-}
-};
-document.getElementById("services").appendChild(div);
-});
+    function registrarAgendamento() {
+        const nome = document.getElementById("nome").value;
+        const obs = document.getElementById("observacao").value || "Nenhuma";
+        if(!nome || !horaSel) return alert("Por favor, selecione um horário e preencha seu nome!");
 
-window.toggleSidebar=function(){
-document.getElementById("sidebar").classList.toggle("active");
-}
+        const listaNomes = selecionados.map(i => servicos[i].nome).join(", ");
+        const total = selecionados.reduce((acc, i) => acc + servicos[i].valor, 0);
 
-window.toggleSub=function(id){
-let el=document.getElementById(id);
-el.style.display = el.style.display==="block" ? "none" : "block";
-}
+        // Prepara Recibo no Modal de Sucesso
+        document.getElementById("reciboContent").innerHTML = `
+            <p><strong>Cliente:</strong> ${nome}</p>
+            <p><strong>Data:</strong> ${dataSel} às ${horaSel}</p>
+            <p><strong>Serviços:</strong> ${listaNomes}</p>
+            <p><strong>Obs:</strong> ${obs}</p>
+            <p><strong>Total:</strong> R$ ${total},00</p>
+        `;
 
-window.mostrarLista=function(){
-document.getElementById("listaAgendamentos").style.display="block";
-}
+        // Troca de Modais
+        document.getElementById("modalAgenda").style.display = "none";
+        document.getElementById("modalSucesso").style.display = "flex";
 
-function gerarCalendario(){
-let cal=document.getElementById("calendar");
-let hoje=new Date();
-for(let i=0;i<7;i++){
-let d=new Date();
-d.setDate(hoje.getDate()+i);
-let div=document.createElement("div");
-div.className="calendar-day";
-div.innerText=d.toLocaleDateString();
-div.onclick=()=>{
-document.querySelectorAll(".calendar-day").forEach(x=>x.classList.remove("selected-day"));
-div.classList.add("selected-day");
-dataSel=d.toLocaleDateString();
-gerarHorarios(d);
-};
-cal.appendChild(div);
-}
-}
+        // Texto para WhatsApp
+        const msg = `Olá Bia! ✨\n\n*Novo Agendamento*\n*Cliente:* ${nome}\n*Data:* ${dataSel} às ${horaSel}\n*Serviços:* ${listaNomes}\n*Obs:* ${obs}\n*Total:* R$ ${total},00`;
+        window.open(`https://wa.me/5511957283274?text=${encodeURIComponent(msg)}`, "_blank");
+    }
 
-function gerarHorarios(d){
-let t=document.getElementById("times");
-t.innerHTML="";
-let dia=d.getDay();
-let inicio=8;
-let fim=(dia===6)?16:20;
-
-for(let h=inicio;h<=fim;h++){
-let hora=(h<10?"0"+h:h)+":00";
-let div=document.createElement("div");
-div.className="time";
-div.innerText=hora;
-div.onclick=()=>{
-document.querySelectorAll(".time").forEach(x=>x.classList.remove("selected-time"));
-div.classList.add("selected-time");
-horaSel=hora;
-};
-t.appendChild(div);
-}
-}
-
-window.mostrarResumo=function(){
-let total=0;
-let nomes=[];
-selecionados.forEach(i=>{
-total+=servicos[i].valor;
-nomes.push(servicos[i].nome);
-});
-
-document.getElementById("resumo").innerHTML=
-`Cliente: ${document.getElementById("nome").value}<br>
-Data: ${dataSel}<br>
-Hora: ${horaSel}<br>
-Serviços: ${nomes.join(", ")}<br>
-<strong>Total: R$ ${total},00</strong>`;
-
-document.getElementById("floating").style.display="block";
-}
-
-window.confirmar=async function(){
-
-let nome=document.getElementById("nome").value;
-let telefone=document.getElementById("telefone").value;
-
-let total=0;
-let nomes=[];
-
-selecionados.forEach(i=>{
-total+=servicos[i].valor;
-nomes.push(servicos[i].nome);
-});
-
-if(!nome || !dataSel || !horaSel || selecionados.length===0){
-alert("Preencha todas as informações.");
-return;
-}
-
-await addDoc(collection(db,"agendamentos"),{
-nome,
-telefone,
-data:dataSel,
-hora:horaSel,
-servicos:nomes,
-total:total,
-criadoEm:new Date()
-});
-
-alert("Agendamento Confirmado 💎");
-
-document.getElementById("floating").style.display="none";
-resetar();
-carregarAgendamentos();
-}
-
-function resetar(){
-document.getElementById("nome").value="";
-document.getElementByById("telefone").value="";
-selecionados=[];
-dataSel="";
-horaSel="";
-document.querySelectorAll(".selected,.selected-day,.selected-time")
-.forEach(x=>x.classList.remove("selected","selected-day","selected-time"));
-}
-
-async function carregarAgendamentos(){
-let tabela=document.getElementById("tabelaAgendamentos");
-tabela.innerHTML="";
-const querySnapshot = await getDocs(collection(db,"agendamentos"));
-querySnapshot.forEach((doc)=>{
-let dados=doc.data();
-let row=tabela.insertRow();
-row.insertCell(0).innerText=dados.nome;
-row.insertCell(1).innerText=dados.data;
-row.insertCell(2).innerText=dados.hora;
-row.insertCell(3).innerText=dados.servicos.join(", ");
-row.insertCell(4).innerText="R$ "+dados.total+",00";
-});
-}
-
-gerarCalendario();
-carregarAgendamentos();
-
+    function fecharTudo() {
+        location.reload();
+    }
 </script>
 
 </body>
