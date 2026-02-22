@@ -1,402 +1,294 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B&S Studio Bia - Agendamento Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barbearia Michel - Agendamento</title>
 
-    <style>
-        :root {
-            --gold: #C6A75E;
-            --dark-bg: #0f0f0f;
-            --card-bg: #1b1b1b;
-            --border: #333;
-            --white: #ffffff;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
 
-        body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: var(--dark-bg);
-            color: var(--white);
-        }
+body{
+    background:url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70') center/cover no-repeat fixed;
+    color:#fff;
+}
 
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
-            letter-spacing: 3px;
-            border-bottom: 1px solid #222;
-        }
-        header span { color: var(--gold); }
+body::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.85);
+    z-index:-1;
+}
 
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-        }
+.container{
+    max-width:1000px;
+    margin:40px auto;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    padding:30px;
+    border-radius:15px;
+}
 
-        h2, h3 { color: var(--gold); font-weight: 400; text-align: center; }
+h1{
+    text-align:center;
+    color:#ff9a00;
+    margin-bottom:30px;
+}
 
-        input, textarea {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #151515;
-            border: 1px solid var(--border);
-            color: white;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
+.section{margin-bottom:25px;}
 
-        input:focus, textarea:focus {
-            border-color: var(--gold);
-            outline: none;
-        }
+input,select{
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+    border:none;
+    border-radius:6px;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+}
 
-        textarea {
-            height: 80px;
-            resize: none;
-        }
+input::placeholder{color:#ccc;}
 
-        .services {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
+.calendar{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:10px;
+    margin-top:15px;
+}
 
-        .service {
-            background: var(--card-bg);
-            padding: 20px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            text-align: center;
-            border-radius: 12px;
-            transition: 0.3s;
-        }
+.day{
+    padding:10px;
+    background:rgba(255,255,255,0.08);
+    text-align:center;
+    cursor:pointer;
+    border-radius:6px;
+    transition:0.3s;
+}
 
-        .service.selected {
-            background: var(--gold);
-            color: #000;
-            font-weight: bold;
-            border-color: var(--gold);
-        }
+.day:hover{background:#ff9a00;color:#000;}
+.day.selected{background:#ff5a00;color:#000;}
 
-        .btn-abrir {
-            display: none;
-            width: 100%;
-            padding: 20px;
-            background: var(--gold);
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 8px;
-            font-size: 16px;
-            text-transform: uppercase;
-        }
+.horarios{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:15px;
+}
 
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+.hora{
+    padding:10px;
+    text-align:center;
+    background:rgba(255,255,255,0.08);
+    border-radius:6px;
+    cursor:pointer;
+    transition:0.3s;
+}
 
-        .modal-content {
-            background: #111;
-            width: 95%;
-            max-width: 500px;
-            border-radius: 15px;
-            position: relative;
-            border: 1px solid var(--gold);
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(198, 167, 94, 0.2);
-        }
+.hora:hover{background:#ff9a00;color:#000;}
+.hora.selected{background:#ff5a00;color:#000;}
 
-        .calendar-header {
-            text-align: center;
-            background: var(--gold);
-            color: #000;
-            padding: 20px;
-        }
+.hora.bloqueado{
+    background:#333;
+    cursor:not-allowed;
+    opacity:0.5;
+}
 
-        .calendar-body { padding: 20px; }
+button{
+    width:100%;
+    padding:14px;
+    margin-top:20px;
+    border:none;
+    border-radius:6px;
+    background:linear-gradient(90deg,#ff9a00,#ff5a00);
+    font-weight:bold;
+    cursor:pointer;
+}
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            text-align: center;
-        }
+.resumo{
+    display:none;
+    margin-top:25px;
+    background:rgba(0,0,0,0.7);
+    padding:20px;
+    border-radius:10px;
+}
 
-        .weekday-label {
-            font-weight: bold;
-            color: var(--gold);
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-
-        .day {
-            padding: 12px 5px;
-            cursor: pointer;
-            border-radius: 8px;
-            background: #1a1a1a;
-            border: 1px solid #222;
-        }
-
-        .day.selected {
-            background: var(--gold) !important;
-            color: #000;
-            font-weight: bold;
-        }
-
-        .day.disabled {
-            color: #444;
-            cursor: not-allowed;
-            background: transparent;
-            border: none;
-        }
-
-        .detalhes-container {
-            display: none;
-            padding: 0 20px 25px 20px;
-        }
-
-        .time-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .time-item {
-            padding: 12px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .time-item.selected {
-            background: var(--gold);
-            color: #000;
-            font-weight: bold;
-        }
-
-        .btn-confirmar {
-            width: 100%;
-            padding: 18px;
-            background: var(--gold);
-            color: #000;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        #modalSucesso .modal-content {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .success-icon {
-            font-size: 50px;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-
-        .recibo {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-            border: 1px dashed var(--gold);
-        }
-
-        .recibo p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-    </style>
+.whatsapp{
+    background:#25d366;
+    margin-top:15px;
+}
+</style>
 </head>
-
 <body>
 
-<header>B&S <span>Studio Bia</span></header>
-
 <div class="container">
-    <input type="text" id="nome" placeholder="Seu Nome Completo">
-    <input type="tel" id="telefone" placeholder="Seu WhatsApp">
 
-    <h3>Selecione os serviços</h3>
-    <div class="services" id="services"></div>
+<h1>Agendamento - Barbearia Michel</h1>
 
-    <button class="btn-abrir" id="btnAbrir" onclick="abrirModalAgenda()">Escolher Data e Horário 📅</button>
+<div class="section">
+<label>Nome</label>
+<input type="text" id="nome" placeholder="Digite seu nome" required>
 </div>
 
-<!-- MODAL AGENDA -->
-<div class="modal-overlay" id="modalAgenda">
-    <div class="modal-content">
-        <div class="calendar-header">
-            <h4 style="margin:0">Fevereiro 2026</h4>
-        </div>
-        <div class="calendar-body">
-            <div class="calendar-grid">
-                <div class="weekday-label">Seg</div><div class="weekday-label">Ter</div><div class="weekday-label">Qua</div>
-                <div class="weekday-label">Qui</div><div class="weekday-label">Sex</div><div class="weekday-label">Sáb</div>
-                <div class="weekday-label">Dom</div>
-                <div id="days-container" style="display: contents;"></div>
-            </div>
-        </div>
-
-        <div class="detalhes-container" id="detalhesContainer">
-            <h4 style="color:var(--gold); margin-bottom:10px;">Horários:</h4>
-            <div class="time-grid" id="timeGrid"></div>
-            
-            <h4 style="color:var(--gold); margin-bottom:10px;">Observações (Opcional):</h4>
-            <textarea id="observacao" placeholder="Ex: Preciso remover alongamento antigo, ou desejo decoração específica..."></textarea>
-            
-            <button class="btn-confirmar" onclick="registrarAgendamento()">Finalizar Agendamento</button>
-        </div>
-    </div>
+<div class="section">
+<label>Telefone</label>
+<input type="text" id="telefone" placeholder="(11) 99999-9999" maxlength="15" required>
 </div>
 
-<!-- MODAL SUCESSO -->
-<div class="modal-overlay" id="modalSucesso">
-    <div class="modal-content">
-        <div class="success-icon">💎</div>
-        <h2 style="margin:0">Agendamento Realizado!</h2>
-        <p>Sua solicitação foi enviada para o WhatsApp da Bia.</p>
-        
-        <div class="recibo" id="reciboContent"></div>
+<div class="section">
+<label>Serviço</label>
+<select id="servico" required>
+<option value="" data-preco="">Escolha</option>
+<option value="Corte Simples" data-preco="40">Corte Simples - R$ 40,00 - 1h</option>
+<option value="Corte + Barba" data-preco="75">Corte + Barba - R$ 75,00 - 1h</option>
+<option value="Corte + Pigmentação" data-preco="90">Corte + Pigmentação - R$ 90,00 - 1h</option>
+<option value="Barba" data-preco="30">Barba - R$ 30,00 - 1h</option>
+</select>
+</div>
 
-        <button class="btn-confirmar" onclick="fecharTudo()">Fechar e Início</button>
-    </div>
+<div class="section">
+<label>Selecione o Dia</label>
+<div class="calendar" id="calendar"></div>
+</div>
+
+<div class="section">
+<label>Selecione o Horário (08h às 21h)</label>
+<div class="horarios" id="horarios"></div>
+</div>
+
+<button onclick="confirmar()">Confirmar Agendamento</button>
+
+<div class="resumo" id="resumo"></div>
+
 </div>
 
 <script>
-    const servicos = [
-        {nome:"Alongamento 2h", valor:150},
-        {nome:"Esmaltação gel mão", valor:80},
-        {nome:"Esmaltação mão", valor:30},
-        {nome:"Esmaltação pé", valor:30},
-        {nome:"Manutenção Alongamento", valor:120},
-        {nome:"Unha em gel pé", valor:80}
-    ];
 
-    let selecionados = [];
-    let dataSel = "";
-    let horaSel = "";
+let dataSelecionada="";
+let horaSelecionada="";
+const calendar=document.getElementById("calendar");
+const hoje=new Date();
 
-    const sDiv = document.getElementById("services");
-    servicos.forEach((s, i) => {
-        let div = document.createElement("div");
-        div.className = "service";
-        div.innerHTML = `<strong>${s.nome}</strong><br>R$ ${s.valor},00`;
-        div.onclick = () => {
-            div.classList.toggle("selected");
-            if(selecionados.includes(i))
-                selecionados = selecionados.filter(x => x !== i);
-            else
-                selecionados.push(i);
+// ===== MÁSCARA TELEFONE =====
+document.getElementById("telefone").addEventListener("input",function(e){
+    let v=e.target.value.replace(/\D/g,"");
+    v=v.replace(/^(\d{2})(\d)/g,"($1) $2");
+    v=v.replace(/(\d{5})(\d)/,"$1-$2");
+    e.target.value=v;
+});
 
-            document.getElementById("btnAbrir").style.display =
-                selecionados.length > 0 ? "block" : "none";
-        };
-        sDiv.appendChild(div);
-    });
+// ===== GERAR CALENDÁRIO =====
+for(let i=0;i<30;i++){
+    let dia=new Date();
+    dia.setDate(hoje.getDate()+i);
 
-    function abrirModalAgenda() {
-        document.getElementById("modalAgenda").style.display = "flex";
-        renderCalendar();
-    }
+    let dataISO = dia.getFullYear()+"-"+ 
+    String(dia.getMonth()+1).padStart(2,'0')+"-"+ 
+    String(dia.getDate()).padStart(2,'0');
 
-    function renderCalendar() {
-        const container = document.getElementById("days-container");
-        container.innerHTML = "";
+    let btn=document.createElement("div");
+    btn.className="day";
+    btn.innerText=dia.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+    btn.dataset.data=dataISO;
 
-        for(let s=0; s<6; s++)
-            container.innerHTML += `<div class="day disabled"></div>`;
+    btn.onclick=function(){
+        document.querySelectorAll(".day").forEach(d=>d.classList.remove("selected"));
+        btn.classList.add("selected");
+        dataSelecionada=btn.dataset.data;
+        carregarHorarios();
+    };
 
-        for(let i=1; i<=28; i++) {
-            let d = document.createElement("div");
-            d.className = i < 10 ? "day disabled" : "day";
-            d.innerText = i;
+    calendar.appendChild(btn);
+}
 
-            if(i >= 10) {
-                d.onclick = () => {
-                    document.querySelectorAll(".day")
-                        .forEach(el => el.classList.remove("selected"));
-                    d.classList.add("selected");
-                    dataSel = `${i}/02/2026`;
-                    mostrarHorarios();
-                };
-            }
+// ===== HORÁRIOS =====
+function carregarHorarios(){
+    let container=document.getElementById("horarios");
+    container.innerHTML="";
+    horaSelecionada="";
 
-            container.appendChild(d);
-        }
-    }
+    for(let h=8;h<=21;h++){
+        let hora=String(h).padStart(2,'0')+":00";
+        let btn=document.createElement("div");
+        btn.className="hora";
+        btn.innerText=hora;
 
-    function mostrarHorarios() {
-        document.getElementById("detalhesContainer").style.display = "block";
-        const grid = document.getElementById("timeGrid");
-        grid.innerHTML = "";
+        let chave=dataSelecionada+"_"+hora;
 
-        ["09:00", "11:00", "14:00", "16:00", "18:00"].forEach(h => {
-            let div = document.createElement("div");
-            div.className = "time-item";
-            div.innerText = h;
-
-            div.onclick = () => {
-                document.querySelectorAll(".time-item")
-                    .forEach(el => el.classList.remove("selected"));
-                div.classList.add("selected");
-                horaSel = h;
+        if(localStorage.getItem(chave)){
+            btn.classList.add("bloqueado");
+        }else{
+            btn.onclick=function(){
+                document.querySelectorAll(".hora").forEach(x=>x.classList.remove("selected"));
+                btn.classList.add("selected");
+                horaSelecionada=hora;
             };
+        }
 
-            grid.appendChild(div);
-        });
+        container.appendChild(btn);
+    }
+}
+
+// ===== CONFIRMAR =====
+function confirmar(){
+
+    let nome=document.getElementById("nome").value.trim();
+    let telefone=document.getElementById("telefone").value.trim();
+    let servicoSelect=document.getElementById("servico");
+    let servico=servicoSelect.value;
+    let preco=Number(servicoSelect.options[servicoSelect.selectedIndex].dataset.preco);
+
+    if(!nome||!telefone||!servico||!dataSelecionada||!horaSelecionada){
+        alert("Preencha todos os campos!");
+        return;
     }
 
-    function registrarAgendamento() {
-        const nome = document.getElementById("nome").value;
-        const obs = document.getElementById("observacao").value || "Nenhuma";
+    let chave=dataSelecionada+"_"+horaSelecionada;
+    localStorage.setItem(chave,"ocupado");
 
-        if(!nome || !horaSel)
-            return alert("Por favor, selecione um horário e preencha seu nome!");
+    let dataFormatada=new Date(dataSelecionada+"T00:00:00").toLocaleDateString("pt-BR");
 
-        const listaNomes = selecionados.map(i => servicos[i].nome).join(", ");
-        const total = selecionados.reduce((acc, i) => acc + servicos[i].valor, 0);
+    let valorFormatado=preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 
-        document.getElementById("reciboContent").innerHTML = `
-            <p><strong>Cliente:</strong> ${nome}</p>
-            <p><strong>Data:</strong> ${dataSel} às ${horaSel}</p>
-            <p><strong>Serviços:</strong> ${listaNomes}</p>
-            <p><strong>Obs:</strong> ${obs}</p>
-            <p><strong>Total:</strong> R$ ${total},00</p>
-        `;
+    document.getElementById("resumo").style.display="block";
+    document.getElementById("resumo").innerHTML=`
+    <h2>Confirmação</h2>
+    <p><strong>Nome:</strong> ${nome}</p>
+    <p><strong>Telefone:</strong> ${telefone}</p>
+    <p><strong>Serviço:</strong> ${servico}</p>
+    <p><strong>Data:</strong> ${dataFormatada}</p>
+    <p><strong>Horário:</strong> ${horaSelecionada}</p>
+    <p><strong>Valor:</strong> ${valorFormatado}</p>
+    <button class="whatsapp" onclick="enviarWhatsApp('${nome}','${servico}','${dataFormatada}','${horaSelecionada}','${valorFormatado}')">
+    Confirmar pelo WhatsApp
+    </button>
+    `;
 
-        document.getElementById("modalAgenda").style.display = "none";
-        document.getElementById("modalSucesso").style.display = "flex";
+    carregarHorarios();
+}
 
-        const msg = `Olá Bia! ✨\n\n*Novo Agendamento*\n*Cliente:* ${nome}\n*Data:* ${dataSel} às ${horaSel}\n*Serviços:* ${listaNomes}\n*Obs:* ${obs}\n*Total:* R$ ${total},00`;
+// ===== WHATSAPP =====
+function enviarWhatsApp(nome,servico,data,hora,valor){
 
-        window.open(`https://wa.me/5511988263789?text=${encodeURIComponent(msg)}`, "_blank");
-    }
+let msg=`Olá, gostaria de confirmar meu agendamento na Barbearia Michel:
 
-    function fecharTudo() {
-        location.reload();
-    }
+Nome: ${nome}
+Serviço: ${servico}
+Data: ${data}
+Horário: ${hora}
+Valor: ${valor}`;
+
+let link=`https://wa.me/5511957283274?text=${encodeURIComponent(msg)}`;
+
+window.open(link,"_blank");
+}
+
 </script>
 
 </body>
