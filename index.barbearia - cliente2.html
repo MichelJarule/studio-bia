@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Agendamento Lucas Barbearia</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+text-transform:uppercase;
+}
+
+body{
+background:url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70') no-repeat center center/cover;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.overlay-bg{
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+z-index:0;
+}
+
+.app{
+position:relative;
+z-index:1;
+width:95%;
+max-width:420px;
+background:rgba(0,0,0,0.7);
+backdrop-filter:blur(20px);
+border-radius:25px;
+padding:30px 25px;
+border:1px solid rgba(212,175,55,0.6);
+box-shadow:0 0 40px rgba(212,175,55,0.4);
+}
+
+h1{
+text-align:center;
+color:#D4AF37;
+margin-bottom:25px;
+font-size:22px;
+}
+
+label{
+color:#D4AF37;
+font-size:14px;
+}
+
+input, select{
+width:100%;
+padding:14px;
+margin-top:5px;
+margin-bottom:18px;
+border:1px solid rgba(255,255,255,0.3);
+border-radius:12px;
+font-size:14px;
+outline:none;
+background:#111;
+color:#fff;
+}
+
+select option{
+background:#111;
+color:#fff;
+}
+
+input:focus, select:focus{
+border-color:#D4AF37;
+box-shadow:0 0 10px rgba(212,175,55,0.6);
+}
+
+/* ===== CALENDÁRIO ===== */
+
+.flatpickr-calendar{
+background:#000 !important;
+border:1px solid #D4AF37;
+}
+
+.flatpickr-current-month{
+color:#888 !important;
+}
+
+.flatpickr-weekday{
+color:#D4AF37 !important;
+}
+
+.flatpickr-day.sunday,
+.flatpickr-day.feriado{
+color:#D4AF37 !important;
+font-weight:600;
+}
+
+.flatpickr-day.selected{
+background:#D4AF37 !important;
+color:#000 !important;
+}
+
+/* ===== HORÁRIOS FLUTUANTES ===== */
+
+.horarios{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+margin-bottom:20px;
+}
+
+.hora-btn{
+padding:14px;
+border-radius:12px;
+background:#111;
+border:1px solid #D4AF37;
+color:#D4AF37;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
+font-weight:600;
+box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
+
+.hora-btn:hover{
+transform:translateY(-4px);
+background:#D4AF37;
+color:#000;
+}
+
+.hora-btn.selected{
+background:#D4AF37;
+color:#000;
+transform:scale(1.05);
+}
+
+.hora-btn.disabled{
+background:#222;
+border:1px solid #555;
+color:#555;
+pointer-events:none;
+text-decoration:line-through;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#D4AF37;
+color:#000;
+font-weight:600;
+font-size:15px;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.03);
+}
+
+footer{
+margin-top:10px;
+text-align:center;
+color:#aaa;
+font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay-bg"></div>
+
+<div class="app">
+<h1>Agendamento Lucas Barbearia</h1>
+
+<label>Nome</label>
+<input type="text" id="nome" placeholder="Digite seu nome">
+
+<label>Telefone</label>
+<input type="text" id="telefone" placeholder="Digite seu telefone">
+
+<label>Serviço</label>
+<select id="servico">
+<option>CORTE - R$ 40,00</option>
+<option>CORTE TODO NA ZERO - R$ 25,00</option>
+<option>SOBRANCELHA - R$ 10,00</option>
+<option>CORTE + SOBRANCELHA - R$ 45,00</option>
+<option>BARBA SIMPLES - R$ 20,00</option>
+<option>BARBA MODELADA - R$ 25,00</option>
+<option>CORTE + BARBA + SOBRANCELHA - R$ 65,00</option>
+<option>ACABAMENTO / PEZINHO - R$ 10,00</option>
+<option>RELAXAMENTO - R$ 30,00</option>
+<option>CORTE + RELAXAMENTO - R$ 65,00</option>
+<option>HIDRATAÇÃO - R$ 30,00</option>
+<option>PROGRESSIVA - R$ 10,00</option>
+<option>PIGMENTAÇÃO + CABELO - R$ 20,00</option>
+<option>PIGMENTAÇÃO + CABELO + BARBA - R$ 25,00</option>
+<option>LUZES - R$ 40,00</option>
+</select>
+
+<label>Data</label>
+<input type="text" id="data" placeholder="Selecione a data">
+
+<label>Horários</label>
+<div class="horarios" id="horarios"></div>
+
+<button onclick="confirmar()">Confirmar Agendamento</button>
+
+<footer>Lucas Barbearia © 2026</footer>
+</div>
+
+<script>
+
+let agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+let horaSelecionada = "";
+
+/* Feriados */
+const feriados = [
+"2026-01-01",
+"2026-04-21",
+"2026-09-07",
+"2026-12-25"
+];
+
+flatpickr("#data",{
+locale:"pt",
+dateFormat:"Y-m-d",
+minDate:"today",
+disable:[date=>date.getDay()===1],
+onChange:function(selectedDates,dateStr){
+gerarHorarios(dateStr);
+},
+onDayCreate:function(dObj,dStr,fp,dayElem){
+let data = dayElem.dateObj.toISOString().split("T")[0];
+if(dayElem.dateObj.getDay()===0){
+dayElem.classList.add("sunday");
+}
+if(feriados.includes(data)){
+dayElem.classList.add("feriado");
+}
+}
+});
+
+/* GERAR HORÁRIOS */
+
+function gerarHorarios(data){
+const container=document.getElementById("horarios");
+container.innerHTML="";
+horaSelecionada="";
+
+for(let h=9; h<=20; h++){
+
+if(h===12) continue;
+
+let hora=(h<10?"0"+h:h)+":00";
+let chave=data+" "+hora;
+
+let btn=document.createElement("div");
+btn.className="hora-btn";
+btn.innerText=hora;
+
+if(agendamentos.includes(chave)){
+btn.classList.add("disabled");
+}else{
+btn.onclick=function(){
+document.querySelectorAll(".hora-btn").forEach(b=>b.classList.remove("selected"));
+btn.classList.add("selected");
+horaSelecionada=hora;
+}
+}
+
+container.appendChild(btn);
+}
+}
+
+/* CONFIRMAR AGENDAMENTO */
+
+function confirmar(){
+
+let nome=document.getElementById("nome").value.trim();
+let telefone=document.getElementById("telefone").value.trim();
+let servico=document.getElementById("servico").value;
+let data=document.getElementById("data").value;
+
+if(!nome||!telefone||!data||!horaSelecionada){
+alert("Preencha todos os campos!");
+return;
+}
+
+let chave=data+" "+horaSelecionada;
+
+/* BLOQUEIA SE JÁ EXISTIR */
+if(agendamentos.includes(chave)){
+alert("Este horário já está agendado!");
+return;
+}
+
+agendamentos.push(chave);
+localStorage.setItem("agendamentos",JSON.stringify(agendamentos));
+
+gerarHorarios(data); // Atualiza visualmente bloqueando
+
+let mensagem=`OLÁ, MEU NOME É ${nome}.
+TELEFONE: ${telefone}
+
+GOSTARIA DE AGENDAR:
+
+SERVIÇO: ${servico}
+DATA: ${data}
+HORA: ${horaSelecionada}`;
+
+let numero="5511967198368";
+window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`,"_blank");
+
+alert("Agendamento realizado com sucesso!");
+}
+
+</script>
+
+</body>
+</html>
