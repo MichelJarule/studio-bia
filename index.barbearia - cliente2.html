@@ -11,7 +11,35 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_DOMINIO",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_ID",
+  appId: "SUA_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+window.query = query;
+window.where = where;
+
+</script>
+
 <style>
+/* ======= SEU CSS ORIGINAL INTACTO ======= */
 *{
 margin:0;
 padding:0;
@@ -84,8 +112,6 @@ border-color:#D4AF37;
 box-shadow:0 0 10px rgba(212,175,55,0.6);
 }
 
-/* ===== CALENDÁRIO ===== */
-
 .flatpickr-calendar{
 background:#000 !important;
 border:1px solid #D4AF37;
@@ -109,8 +135,6 @@ font-weight:600;
 background:#D4AF37 !important;
 color:#000 !important;
 }
-
-/* ===== HORÁRIOS FLUTUANTES ===== */
 
 .horarios{
 display:grid;
@@ -223,37 +247,28 @@ font-size:12px;
 
 <script>
 
-let agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
 let horaSelecionada = "";
+let agendamentos = [];
 
-/* Feriados */
-const feriados = [
-"2026-01-01",
-"2026-04-21",
-"2026-09-07",
-"2026-12-25"
-];
+async function carregarAgendamentos(data){
+  const q = query(collection(db, "agendamentos"), where("data", "==", data));
+  const querySnapshot = await getDocs(q);
+  agendamentos = [];
+  querySnapshot.forEach(doc => {
+    agendamentos.push(doc.data().hora);
+  });
+}
 
 flatpickr("#data",{
 locale:"pt",
 dateFormat:"Y-m-d",
 minDate:"today",
 disable:[date=>date.getDay()===1],
-onChange:function(selectedDates,dateStr){
+onChange:async function(selectedDates,dateStr){
+await carregarAgendamentos(dateStr);
 gerarHorarios(dateStr);
-},
-onDayCreate:function(dObj,dStr,fp,dayElem){
-let data = dayElem.dateObj.toISOString().split("T")[0];
-if(dayElem.dateObj.getDay()===0){
-dayElem.classList.add("sunday");
-}
-if(feriados.includes(data)){
-dayElem.classList.add("feriado");
-}
 }
 });
-
-/* GERAR HORÁRIOS */
 
 function gerarHorarios(data){
 const container=document.getElementById("horarios");
@@ -265,13 +280,12 @@ for(let h=9; h<=20; h++){
 if(h===12) continue;
 
 let hora=(h<10?"0"+h:h)+":00";
-let chave=data+" "+hora;
 
 let btn=document.createElement("div");
 btn.className="hora-btn";
 btn.innerText=hora;
 
-if(agendamentos.includes(chave)){
+if(agendamentos.includes(hora)){
 btn.classList.add("disabled");
 }else{
 btn.onclick=function(){
@@ -285,9 +299,7 @@ container.appendChild(btn);
 }
 }
 
-/* CONFIRMAR AGENDAMENTO */
-
-function confirmar(){
+async function confirmar(){
 
 let nome=document.getElementById("nome").value.trim();
 let telefone=document.getElementById("telefone").value.trim();
@@ -299,18 +311,22 @@ alert("Preencha todos os campos!");
 return;
 }
 
-let chave=data+" "+horaSelecionada;
-
-/* BLOQUEIA SE JÁ EXISTIR */
-if(agendamentos.includes(chave)){
+if(agendamentos.includes(horaSelecionada)){
 alert("Este horário já está agendado!");
 return;
 }
 
-agendamentos.push(chave);
-localStorage.setItem("agendamentos",JSON.stringify(agendamentos));
+await addDoc(collection(db, "agendamentos"), {
+nome,
+telefone,
+servico,
+data,
+hora:horaSelecionada,
+criadoEm:new Date()
+});
 
-gerarHorarios(data); // Atualiza visualmente bloqueando
+await carregarAgendamentos(data);
+gerarHorarios(data);
 
 let mensagem=`OLÁ, MEU NOME É ${nome}.
 TELEFONE: ${telefone}
